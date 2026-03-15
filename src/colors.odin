@@ -174,13 +174,13 @@ generate_color_choices :: proc(trace: ^Trace, use_random: bool) {
 		h := rand.float32()
 
 		for i := 0; i < COLOR_CHOICES; i += 1 {
-				h += 0.61803398875
-				h = h - math.floor(h)
+			h += 0.61803398875
+			h = h - math.floor(h)
 
-				s := 0.65 + rand.float32()*0.2
-				v : f32 = 0.9
+			s := 0.65 + rand.float32()*0.2
+			v : f32 = 0.9
 
-				trace.color_choices[i] = hsv2rgb(FVec3{h, s, v}) * 255
+			trace.color_choices[i] = hsv2rgb(FVec3{h, s, v}) * 255
 		}
 	}
 }
