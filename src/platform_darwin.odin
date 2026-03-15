@@ -60,4 +60,6 @@ demangle_symbol :: proc(name: string, tmp_buffer: []u8) -> (string, bool) {
 	return string(ret_str), true
 }
 
+get_system_color :: proc() -> bool { return true }
+
 supports_sampling :: proc() -> (ok: bool) { return false }

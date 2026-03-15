@@ -350,6 +350,5 @@ flush_rects :: proc(gfx: ^GFX_Context) {
 	non_zero_resize(&gfx.rects, 0)
 }
 
-get_system_color :: proc() -> bool { return false }
 get_session_storage :: proc(key: string) { }
 set_session_storage :: proc(key, val: string) { }

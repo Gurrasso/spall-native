@@ -745,5 +745,7 @@ demangle_symbol :: proc(name: string, tmp_buffer: []u8) -> (string, bool) {
 	return string(ret_str), true
 }
 
+get_system_color :: proc() -> bool { return true }
+
 sample_child :: proc(trace: ^Trace, program_name: string, path: string, args: []string) -> (ok: bool) { return }
 supports_sampling :: proc() -> (ok: bool) { return }
