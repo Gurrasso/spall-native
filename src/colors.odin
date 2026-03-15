@@ -3,6 +3,7 @@ package main
 import "core:fmt"
 import "core:mem"
 import "core:hash"
+import "core:math"
 import "core:math/rand"
 import "core:math/linalg/glsl"
 
@@ -170,15 +171,16 @@ generate_color_choices :: proc(trace: ^Trace, use_random: bool) {
 			trace.color_choices[i] = trace.color_choices[i - presets]
 		}
 	} else {
-		for i := 0; i < COLOR_CHOICES; i += 1 {
-			h := rand.float32() * 0.5 + 0.5
-			h *= h
-			h *= h
-			h *= h
-			s := 0.5 + rand.float32() * 0.1
-			v : f32 = 0.85
+		h := rand.float32()
 
-			trace.color_choices[i] = hsv2rgb(FVec3{h, s, v}) * 255
+		for i := 0; i < COLOR_CHOICES; i += 1 {
+				h += 0.61803398875
+				h = h - math.floor(h)
+
+				s := 0.65 + rand.float32()*0.2
+				v : f32 = 0.9
+
+				trace.color_choices[i] = hsv2rgb(FVec3{h, s, v}) * 255
 		}
 	}
 }

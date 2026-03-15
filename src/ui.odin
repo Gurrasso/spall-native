@@ -446,7 +446,7 @@ draw_header :: proc(gfx: ^GFX_Context, trace: ^Trace, ui_state: ^UIState) {
 		cursor_x += button_width + button_pad
 
 		// Process All Events
-		if button(gfx, Rect{cursor_x, (header_rect.h / 2) - (button_height / 2), button_width, button_height}, "\uf1fe", "get stats for the whole file", .IconFont, 0, ui_state.width) {
+		if button(gfx, Rect{cursor_x, (header_rect.h / 2) - (button_height / 2), button_width, button_height}, "\uf1fe", "get stats for the entire file", .IconFont, 0, ui_state.width) {
 			trace.stats.start_time = 0
 			trace.stats.end_time = f64(trace.total_max_time - trace.total_min_time)
 			ui_state.multiselecting = true
