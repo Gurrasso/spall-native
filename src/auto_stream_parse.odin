@@ -207,7 +207,7 @@ as_parse_next_event :: proc(trace: ^Trace, chunk: []u8, process: ^Process, threa
 	return .EventRead
 }
 
-as_parse :: proc(trace: ^Trace, fd: os.Handle, header_size: i64) -> bool {
+as_parse :: proc(trace: ^Trace, fd: ^os.File, header_size: i64) -> bool {
 	buffer_header := spall_fmt.Auto_Buffer_Header{}
 	p := &trace.parser
 
@@ -218,7 +218,7 @@ as_parse :: proc(trace: ^Trace, fd: os.Handle, header_size: i64) -> bool {
 	defer delete(chunk_buffer)
 
 	read_size, err := os.read_at(fd, chunk_buffer, 0)
-	if err != nil {
+	if err != nil && err != .EOF {
 		post_error(trace, "Unable to read file!")
 		return false
 	}

@@ -58,7 +58,9 @@ reset_flamegraph_camera :: proc(trace: ^Trace, ui_state: ^UIState) {
 
 	side_pad  := 2 * em
 
-	cam.current_scale = rescale(cam.current_scale, start_time, end_time, 0, ui_state.full_flamegraph_rect.w - (side_pad * 2))
+	margin : f64 = end_time * 0.001
+
+	cam.current_scale = rescale(cam.current_scale, start_time, end_time - margin, 0, ui_state.full_flamegraph_rect.w - (side_pad * 2))
 	cam.target_scale = cam.current_scale
 
 	cam.pan.x += side_pad

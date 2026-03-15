@@ -832,7 +832,7 @@ process_next_json_event :: proc(trace: ^Trace, jp: ^JSONParser, chunk: []u8) -> 
 	return
 }
 
-json_parse :: proc (trace: ^Trace, fd: os.Handle) -> bool {
+json_parse :: proc (trace: ^Trace, fd: ^os.File) -> bool {
 	p := &trace.parser
 	jp := init_json_parser()
 
@@ -840,7 +840,7 @@ json_parse :: proc (trace: ^Trace, fd: os.Handle) -> bool {
 	defer delete(chunk_buffer)
 
 	read_size, err := os.read_at(fd, chunk_buffer, 0)
-	if err != nil {
+	if err != nil && err != .EOF {
 		post_error(trace, "Unable to read file!")
 		return false
 	}
