@@ -108,7 +108,7 @@ ms_v1_push_event :: proc(trace: ^Trace, process_id, thread_id: u32, event: ^Even
 	return p_idx, t_idx, len(depth.events)-1, true
 }
 
-ms_v1_parse :: proc(trace: ^Trace, fd: ^os.File, header_size: i64) -> bool {
+ms_v1_parse :: proc(trace: ^Trace, f: ^os.File, header_size: i64) -> bool {
 	temp_ev := TempEvent{}
 	ev := Event{}
 	p := &trace.parser
@@ -116,7 +116,7 @@ ms_v1_parse :: proc(trace: ^Trace, fd: ^os.File, header_size: i64) -> bool {
 	chunk_buffer := make([]u8, 4 * 1024 * 1024)
 	defer delete(chunk_buffer)
 
-	read_size, err := os.read_at(fd, chunk_buffer, 0)
+	read_size, err := os.read_at(f, chunk_buffer, 0)
 	if err != nil && err != .EOF {
 		post_error(trace, "Unable to read file!")
 		return false
@@ -138,7 +138,7 @@ ms_v1_parse :: proc(trace: ^Trace, fd: ^os.File, header_size: i64) -> bool {
 
 			p.offset = p.pos
 
-			rd_sz, ok := get_chunk(p, fd, chunk_buffer)
+			rd_sz, ok := get_chunk(p, f, chunk_buffer)
 			if !ok {
 				post_error(trace, "Failed to read file!")
 				return false
@@ -391,14 +391,14 @@ ms_v2_get_next_buffer :: proc(trace: ^Trace, chunk: []u8, buffer_header: ^spall_
 	return .EventRead
 }
 
-ms_v2_parse :: proc(trace: ^Trace, fd: ^os.File, header_size: i64) -> bool {
+ms_v2_parse :: proc(trace: ^Trace, f: ^os.File, header_size: i64) -> bool {
 	buffer_header := spall_fmt.Manual_Buffer_Header{}
 	p := &trace.parser
 
 	chunk_buffer := make([]u8, 4 * 1024 * 1024)
 	defer delete(chunk_buffer)
 
-	read_size, err := os.read_at(fd, chunk_buffer, 0)
+	read_size, err := os.read_at(f, chunk_buffer, 0)
 	if err != nil && err != .EOF {
 		post_error(trace, "Unable to read file!")
 		return false
@@ -420,7 +420,7 @@ ms_v2_parse :: proc(trace: ^Trace, fd: ^os.File, header_size: i64) -> bool {
 
 			p.offset = p.pos
 
-			rd_sz, ok := get_chunk(p, fd, chunk_buffer)
+			rd_sz, ok := get_chunk(p, f, chunk_buffer)
 			if !ok {
 				post_error(trace, "Failed to read file!")
 				return false
@@ -452,7 +452,7 @@ ms_v2_parse :: proc(trace: ^Trace, fd: ^os.File, header_size: i64) -> bool {
 
 				p.offset = p.pos
 
-				rd_sz, ok := get_chunk(p, fd, chunk_buffer)
+				rd_sz, ok := get_chunk(p, f, chunk_buffer)
 				if !ok {
 					post_error(trace, "Failed to read file!")
 					return false

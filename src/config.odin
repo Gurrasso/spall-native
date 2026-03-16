@@ -83,8 +83,8 @@ load_trace :: proc(loader: ^Loader, trace: ^Trace, ui_state: ^UIState, trace_nam
 
 real_pos :: proc(p: ^Parser) -> i64 { return p.pos }
 chunk_pos :: proc(p: ^Parser) -> i64 { return p.pos - p.offset }
-get_chunk :: proc(p: ^Parser, fd: ^os.File, chunk_buffer: []u8) -> (int, bool) {
-	rd_sz, err2 := os.read_at(fd, chunk_buffer, p.pos)
+get_chunk :: proc(p: ^Parser, f: ^os.File, chunk_buffer: []u8) -> (int, bool) {
+	rd_sz, err2 := os.read_at(f, chunk_buffer, p.pos)
 	if err2 != nil {
 		return 0, false
 	}
@@ -651,14 +651,14 @@ load_spall_file :: proc(loader: ^Loader, trace: ^Trace, file_name: string) {
 
 	init_trace_allocs(trace, file_name)
 
-	trace_fd, err := os.open(file_name)
+	trace_f, err := os.open(file_name)
 	if err != nil {
 		post_error(trace, "%s not found!", file_name)
 		return
 	}
-	defer os.close(trace_fd)
+	defer os.close(trace_f)
 
-	total_size, err2 := os.file_size(trace_fd)
+	total_size, err2 := os.file_size(trace_f)
 	if err2 != nil {
 		post_error(trace, "unable to get file size!")
 		return
@@ -671,7 +671,7 @@ load_spall_file :: proc(loader: ^Loader, trace: ^Trace, file_name: string) {
 	fmt.printf("Loading %s, %M\n", trace.base_name, trace.total_size)
 
 	header_buffer := [0x4000]u8{}
-	rd_sz, err3 := os.read_at(trace_fd, header_buffer[:], 0)
+	rd_sz, err3 := os.read_at(trace_f, header_buffer[:], 0)
 	if err3 != nil {
 		post_error(trace, "Unable to read %s!", file_name)
 		return
@@ -765,13 +765,13 @@ load_spall_file :: proc(loader: ^Loader, trace: ^Trace, file_name: string) {
 	parsed_properly := false
 	#partial switch file_type {
 	case .ManualStreamV1:
-		parsed_properly = ms_v1_parse(trace, trace_fd, header_size)
+		parsed_properly = ms_v1_parse(trace, trace_f, header_size)
 	case .ManualStreamV2:
-		parsed_properly = ms_v2_parse(trace, trace_fd, header_size)
+		parsed_properly = ms_v2_parse(trace, trace_f, header_size)
 	case .AutoStream:
-		parsed_properly = as_parse(trace, trace_fd, header_size)
+		parsed_properly = as_parse(trace, trace_f, header_size)
 	case .Json:
-		parsed_properly = json_parse(trace, trace_fd)
+		parsed_properly = json_parse(trace, trace_f)
 	}
 
 	if parsed_properly && (p.pos == i64(header_size) || trace.event_count == 0) {

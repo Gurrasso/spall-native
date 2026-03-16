@@ -207,7 +207,7 @@ as_parse_next_event :: proc(trace: ^Trace, chunk: []u8, process: ^Process, threa
 	return .EventRead
 }
 
-as_parse :: proc(trace: ^Trace, fd: ^os.File, header_size: i64) -> bool {
+as_parse :: proc(trace: ^Trace, f: ^os.File, header_size: i64) -> bool {
 	buffer_header := spall_fmt.Auto_Buffer_Header{}
 	p := &trace.parser
 
@@ -217,7 +217,7 @@ as_parse :: proc(trace: ^Trace, fd: ^os.File, header_size: i64) -> bool {
 	chunk_buffer := make([]u8, 4 * 1024 * 1024)
 	defer delete(chunk_buffer)
 
-	read_size, err := os.read_at(fd, chunk_buffer, 0)
+	read_size, err := os.read_at(f, chunk_buffer, 0)
 	if err != nil && err != .EOF {
 		post_error(trace, "Unable to read file!")
 		return false
@@ -238,7 +238,7 @@ as_parse :: proc(trace: ^Trace, fd: ^os.File, header_size: i64) -> bool {
 
 			p.offset = p.pos
 
-			rd_sz, ok := get_chunk(p, fd, chunk_buffer)
+			rd_sz, ok := get_chunk(p, f, chunk_buffer)
 			if !ok {
 				post_error(trace, "Failed to read file!")
 				return false
@@ -279,7 +279,7 @@ as_parse :: proc(trace: ^Trace, fd: ^os.File, header_size: i64) -> bool {
 
 				p.offset = p.pos
 
-				rd_sz, ok := get_chunk(p, fd, chunk_buffer)
+				rd_sz, ok := get_chunk(p, f, chunk_buffer)
 				if !ok {
 					post_error(trace, "Failed to read file!")
 					return false
