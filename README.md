@@ -31,8 +31,8 @@ Linux, macOS:
 ./build.sh release
 ```
 
-The binary will be placed in the `bin` directory.
-Remove the release flag to build the debug version.
+The binary will be placed in the `bin` directory.  
+Remove the `release` flag to build the debug version.
 
 ### Notes
 
