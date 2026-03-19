@@ -9,7 +9,7 @@ Spall Native is a desktop application for viewing large program traces generated
 ## Changes from Upstream
 
 - Fixed the build on windows and linux
-- Migrated most things to odins new core:os
+- Migrated most things to odin's new core:os
 - Improved the color generation for the flame graph
 
 ## Getting Started
