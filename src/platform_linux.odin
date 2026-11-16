@@ -3,12 +3,14 @@ package main
 
 import "core:c"
 import "core:sys/unix"
-import os "core:os/old"
+import "core:os"
 import "core:fmt"
 import "core:strings"
 import "core:time"
 import "core:strconv"
 import "core:slice"
+
+import "core:sys/linux"
 
 import "vendor:x11/xlib"
 import "vendor:egl"
@@ -57,10 +59,10 @@ text_cursor: xlib.Cursor
 
 open_file_dialog :: proc() -> (string, bool) {
 	buffer := [4096]u8{}
-	fds := [2]os.Handle{}
+	fds := [2]linux.Fd{}
 	ret := unix.sys_pipe2(raw_data(&fds), 0)
 
-	pid, err := os.fork()
+	pid, err := linux.fork()
 	if err != os.ERROR_NONE {
 		fmt.printf("Spall uses Zenity for file dialogs! Please install Zenity or launch your trace via the command line, ex: spall <trace>\n")
 		unix.sys_close(int(fds[0]))
@@ -72,7 +74,16 @@ open_file_dialog :: proc() -> (string, bool) {
 		unix.sys_dup2(int(fds[1]), 1)
 		unix.sys_close(int(fds[1]))
 		unix.sys_close(int(fds[0]))
-		os.execvp("zenity", []string{"--file-selection"})
+		status, _, _, err := os.process_exec(
+			{command = {"zenity", "--file-selection"}},
+			context.temp_allocator,
+		)
+		if err != nil {
+			fmt.printf("Could not run zenity: %v", err)
+		}
+		if status.exit_code != 0 {
+			fmt.printf("Zenity exited with status code: %v", status.exit_code)
+		}
 		os.exit(1)
 	}
 	unix.sys_close(int(fds[1]))
@@ -214,9 +225,7 @@ _get_dpi :: proc(x_display: ^xlib.Display) -> f32 {
 	}
 
 	dpi_str := string(cstring(value.addr))
-	dpi_f64, ok := strconv.parse_f64(dpi_str)
-	if !ok do return dpi
-	dpi = f32(dpi_f64)
+	dpi, _ = strconv.parse_f32(dpi_str)
 	if dpi == 0 {
 		return 96
 	}
@@ -229,7 +238,7 @@ _create_cursor :: proc(display: ^xlib.Display, name: cstring, theme: cstring, si
 	if theme != nil {
 		img := xlib.cursorLibraryLoadImage(name, theme, size)
 		if img != nil {
-			cursor := xlib.cursorImageLoadCursor(display, auto_cast img)
+			cursor := xlib.cursorImageLoadCursor(display, cast(^xlib.CursorImage)img)
 			xlib.cursorImageDestroy(img)
 			return cursor
 		}
