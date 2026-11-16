@@ -3,14 +3,14 @@ package main
 
 import "core:c"
 import "core:sys/unix"
+import "core:sys/linux"
+import "core:sys/posix"
 import "core:os"
 import "core:fmt"
 import "core:strings"
 import "core:time"
 import "core:strconv"
 import "core:slice"
-
-import "core:sys/linux"
 
 import "vendor:x11/xlib"
 import "vendor:egl"
@@ -74,16 +74,7 @@ open_file_dialog :: proc() -> (string, bool) {
 		unix.sys_dup2(int(fds[1]), 1)
 		unix.sys_close(int(fds[1]))
 		unix.sys_close(int(fds[0]))
-		status, _, _, err := os.process_exec(
-			{command = {"zenity", "--file-selection"}},
-			context.temp_allocator,
-		)
-		if err != nil {
-			fmt.printf("Could not run zenity: %v", err)
-		}
-		if status.exit_code != 0 {
-			fmt.printf("Zenity exited with status code: %v", status.exit_code)
-		}
+		posix.execvp("zenity", raw_data([]cstring{"zenity", "--file-selection", nil}))
 		os.exit(1)
 	}
 	unix.sys_close(int(fds[1]))
